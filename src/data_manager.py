@@ -2,24 +2,27 @@ import csv
 import os
 
 
-def write_pattern(name: str, x_elements: list, y_elements: list) -> None:
+def write_pattern(name: str, x_elements: list, y_elements: list, force: bool = False) -> None:
     name += '.csv'
     if name in os.listdir('data'):
-        print("The pattern with this name is already existing!")
-        return
-    with open(f'data\{name}', 'w', newline='') as csv_file:
+        print(f"The pattern named '{name[:-4]}' already exists!")
+        if not force:
+            print("To rewrite the patternt with this name, apply the force")
+            print("THE PATTERN WAS NOT SAVED!")
+            return
+    with open(f'data\\{name}', 'w', newline='') as csv_file:
         writer = csv.writer(csv_file, delimiter=',', quotechar='|', quoting=csv.QUOTE_MINIMAL)
-
         writer.writerow([len(x_elements)])
         for row in x_elements:
             writer.writerow(row)
         for row in y_elements:
             writer.writerow(row)
+        print(f"The pattern named '{name[:-4]}' is saved successfully!")
 
 
 def read_pattern(name: str) -> list:
     try:
-        with open(f'data\{name}.csv', newline='') as csv_file:
+        with open(f'data\\{name}.csv', newline='') as csv_file:
             reader = csv.reader(csv_file, delimiter=',', quotechar='|')
             data = list(reader)
 
@@ -33,7 +36,7 @@ def read_pattern(name: str) -> list:
 
             if x_elements and y_elements:
                 return x_elements, y_elements
-            
+
     except FileNotFoundError:
         print(f"There is no pattern with name '{name}'!")
         print("Please, select a pattern from the list:")

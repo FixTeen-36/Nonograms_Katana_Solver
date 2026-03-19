@@ -2,6 +2,10 @@ from .solver import *
 from .results_printers import *
 from .data_manager import *
 
+__version__ = "1.0.0"
+
+def get_src_version() -> str:
+    return __version__
 
 def print_row_debuging(row: list, elements_lengths: list, all_options: bool = True, solved_options: bool = True):
     print("Original Row:")

@@ -1,0 +1,10 @@
+src version: 1.0.0
+test sample: spartan.csv
+total number of iterations: 18,740,658
+
+solver.py statictics:
+       def get_all_row_options(row_len: int, el: list) -> list:  # el: elments_ length
+   60:     remainder = row_len - (sum(el) + len(el) - 1)  # remainder: how many blank spaces are after the last element 
+   60:     cc = remainder
+   60:     coordinates = []
+...

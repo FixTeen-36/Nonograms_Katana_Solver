@@ -2,7 +2,7 @@ def get_all_row_options(row_len: int, el: list) -> list:  # el: elments_ length
     remainder = row_len - (sum(el) + len(el) - 1)  # remainder: how many blank spaces are after the last element 
     cc = remainder
     coordinates = []
-    for length in el[:]:
+    for length in el:
         to_extend = range(cc, (cc + length))
         coordinates.extend(list(to_extend))
         cc += length + 1
@@ -36,8 +36,8 @@ def solve_row(row: list, options: list) -> bool:
             crosses.add(i)
     
     to_pop = []
-    intersection = set(range(len(row)))
-    substraction = set(range(len(row)))
+    intersection = set(range(len(row))) - points
+    substraction = set(range(len(row))) - crosses
     for i, option in enumerate(options):
         coordinates = set(option)
         if (coordinates & crosses) or not(points <= coordinates):

@@ -2,7 +2,7 @@ from .solver import *
 from .results_printers import *
 from .data_manager import *
 
-__version__ = "1.0.1"
+__version__ = "1.0.2"
 
 def get_src_version() -> str:
     return __version__

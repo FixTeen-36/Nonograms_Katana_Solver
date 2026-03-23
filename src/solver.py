@@ -26,7 +26,7 @@ def get_all_row_options(row_len: int, el: list) -> list:  # el: elments_ length
     return options
 
 
-def solve_row(row: list, options: list) -> bool:
+def solve_row(row: list, options: list) -> set:
     points = set()
     crosses = set()
     for i, value in enumerate(row):
@@ -53,7 +53,7 @@ def solve_row(row: list, options: list) -> bool:
     for i in substraction:
         row[i] = 2
 
-    return True if to_pop else False
+    return intersection | substraction
 
 
 def solve_field(x_elements: list, y_elements: list) -> list:
@@ -67,13 +67,14 @@ def solve_field(x_elements: list, y_elements: list) -> list:
     to_continue = True
     while to_continue:
         to_continue = False
+        columns_to_solve = set()
         for i in range(m):  # solve rows
             row = field[i*n:(i + 1)*n]
-            if solve_row(row, x_options[i]):
-                to_continue = True
+            columns_to_solve |= solve_row(row, x_options[i])
             field[i*n:(i + 1)*n] = row
-
-        for i in range(n):  # solve columns
+        to_continue = True if columns_to_solve else False
+        
+        for i in columns_to_solve:  # solve columns
             column = field[i::n]
             if solve_row(column, y_options[i]):
                 to_continue = True

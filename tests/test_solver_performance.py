@@ -5,7 +5,7 @@ import linecache
 print("test is running")
 # input data
 src_version = get_src_version()
-input_file = "cobra"
+input_file = "pelican"
 
 # run example
 analyser = trace.Trace(trace=0, ignoredirs='src.data_manager.py')

@@ -1,0 +1,125 @@
+solver performance test results
+src version: 1.0.3
+input file: pelican.csv
+total iterations: 59,778
+
+solver.py line execution statistics:
+          def get_all_row_options(row_len: int, elements: list) -> list:  # el: elments_ length
+      30:     remainder = row_len - (sum(elements) + len(elements) - 1)  # remainder: how many blank spaces are after the last element 
+      30:     cc = remainder
+      30:     coordinates = []
+     143:     for length in elements:
+     113:         to_extend = range(cc, (cc + length))
+     113:         coordinates.extend(list(to_extend))
+     113:         cc += length + 1
+          
+      30:     options = [coordinates]
+      30:     number_of_copies = [0] * remainder
+      30:     s_n = 1  # sum of number of copies
+     143:     for i in range(len(elements)):
+     632:         for _ in range(remainder):
+    3717:             for coordinates in options[-s_n:]:
+    3198:                 c_copy = coordinates[:]
+    3198:                 j_a = sum(elements[:i])
+    3198:                 c_copy.insert(j_a, (c_copy[j_a] - 1))
+    3198:                 j_b = sum(elements[:(i + 1)])
+    3198:                 c_copy.pop(j_b)
+    3198:                 options.append(c_copy)
+     519:             number_of_copies.append(s_n)
+     519:             s_n -= number_of_copies.pop(0)
+     113:         s_n = sum(number_of_copies)
+          
+      30:     return options
+          
+          
+          def solve_row(row: list, options: list) -> set:
+     102:     points = set()
+     102:     crosses = set()
+    1632:     for i, value in enumerate(row):
+    1530:         if value == 1:
+     356:             points.add(i)
+    1530:         if value == 2:
+     422:             crosses.add(i)
+              
+     102:     to_pop = []
+     102:     intersection = set(range(len(row))) - points
+     102:     substraction = set(range(len(row))) - crosses
+    4724:     for i, option in enumerate(options):
+    4622:         coordinates = set(option)
+    4622:         if (coordinates & crosses) or not(points <= coordinates):
+    3198:             to_pop.append(i)
+                  else:
+    1424:             intersection = intersection & coordinates
+    1424:             substraction = substraction - coordinates
+          
+    3300:     for i in reversed(to_pop):
+    3198:         options.pop(i)
+     195:     for i in intersection:
+      93:         row[i] = 1
+     225:     for i in substraction:
+     123:         row[i] = 2
+          
+     102:     return intersection | substraction
+          
+          
+          def solve_blank_row(row: list, elements: list) -> set:
+      24:     remainder = len(row) - (sum(elements) + len(elements) - 1)  # remainder: how many blank spaces are after the last element 
+      24:     coordinate = 0
+      24:     points = []
+     103:     for length in elements:
+      79:         if remainder < length:
+       4:             to_extend = range((coordinate + remainder), (coordinate + length))
+       4:             points.extend(list(to_extend))
+      79:         coordinate += length + 1
+              
+      33:     for i in points:
+       9:         row[i] = 1
+              
+      24:     if remainder == 0:
+                  coordinate = 0
+                  for length in elements[:-1]:
+                      coordinate += length
+                      row[coordinate] = 2
+                      coordinate += 1
+                  return set(range(len(row)))
+              
+      24:     return set(points)
+          
+          
+          def solve_field(x_elements: list, y_elements: list) -> list:
+       1:     m = len(x_elements)  # number of rows
+       1:     n = len(y_elements)  # number of columns
+       1:     field = [0] * (m * n)
+          
+       1:     columns_to_solve = set()
+      16:     for i in range(m):  # solve blank rows
+      15:         row = [0] * n
+      15:         columns_to_solve |= solve_blank_row(row, x_elements[i])
+      15:         field[i*n:(i + 1)*n] = row
+          
+       1:     rows_to_solve = set() 
+      10:     for i in (set(range(n)) - columns_to_solve):  # solve blank columns
+       9:         column = [0] * m
+       9:         rows_to_solve |= solve_blank_row(column, y_elements[i])
+       9:         field[i::n] = column
+          
+      16:     x_options = [get_all_row_options(n, elements) for elements in x_elements]
+      16:     y_options = [get_all_row_options(m, elements) for elements in y_elements]
+          
+       1:     to_continue = True
+       9:     while to_continue:
+      56:         for i in rows_to_solve:  # solve rows
+      48:             row = field[i*n:(i + 1)*n]
+      48:             columns_to_solve |= solve_row(row, x_options[i])
+      48:             field[i*n:(i + 1)*n] = row
+       8:         rows_to_solve = set()
+                  
+      62:         for i in columns_to_solve:  # solve columns
+      54:             column = field[i::n]
+      54:             rows_to_solve |= solve_row(column, y_options[i])
+      54:             field[i::n] = column
+       8:         columns_to_solve = set()
+          
+       8:         to_continue = True if rows_to_solve else False
+          
+       1:     return field, m, n

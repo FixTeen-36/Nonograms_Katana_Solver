@@ -5,7 +5,7 @@ import linecache
 print("test is running")
 # input data
 src_version = get_src_version()
-input_file = "spartan"
+input_file = "pelican"
 
 # run example
 analyser = trace.Trace(trace=0, ignoredirs='src.data_manager.py')
@@ -25,8 +25,9 @@ summary += f"total iterations: {sum(results.values()):,}"
 print(summary)
 
 # write results in file
-file_name = f"sptr_v_{src_version.replace('.', '_')}_{input_file}.txt"
-with open(f'tests\\solver_performance_results\\{file_name}', "w") as f:
+src_version = src_version.replace('.', '_')
+file_name = f"sptr_v_{src_version}_{input_file}.txt"
+with open(f'tests\\solver_performance_results\\v_{src_version}\\{file_name}', "w") as f:
     f.write(summary + "\n\n")
     f.write("solver.py line execution statistics:\n")
     for line_no, code_line in enumerate(linecache.getlines('src\\solver.py'), 1):

@@ -1,0 +1,88 @@
+solver performance test results
+src version: 1.0.0
+input file: pelican.csv
+total iterations: 92,091
+
+solver.py line execution statistics:
+          def get_all_row_options(row_len: int, el: list) -> list:  # el: elments_ length
+      30:     remainder = row_len - (sum(el) + len(el) - 1)  # remainder: how many blank spaces are after the last element 
+      30:     cc = remainder
+      30:     coordinates = []
+     143:     for length in el[:]:
+     113:         to_extend = range(cc, (cc + length))
+     113:         coordinates.extend(list(to_extend))
+     113:         cc += length + 1
+          
+      30:     options = [coordinates]
+      30:     number_of_copies = [0] * remainder
+      30:     s_n = 1  # sum of number of copies
+     143:     for i in range(len(el)):
+     632:         for _ in range(remainder):
+    3717:             for coordinates in options[-s_n:]:
+    3198:                 c_copy = coordinates[:]
+    3198:                 j_a = sum(el[:i])
+    3198:                 c_copy.insert(j_a, (c_copy[j_a] - 1))
+    3198:                 j_b = sum(el[:(i + 1)])
+    3198:                 c_copy.pop(j_b)
+    3198:                 options.append(c_copy)
+     519:             number_of_copies.append(s_n)
+     519:             s_n -= number_of_copies.pop(0)
+     113:         s_n = sum(number_of_copies)
+          
+      30:     return options
+          
+          
+          def solve_row(row: list, options: list) -> bool:
+     270:     points = set()
+     270:     crosses = set()
+    4320:     for i, value in enumerate(row):
+    4050:         if value == 1:
+    1309:             points.add(i)
+    4050:         if value == 2:
+    1511:             crosses.add(i)
+              
+     270:     to_pop = []
+     270:     intersection = set(range(len(row)))
+     270:     substraction = set(range(len(row)))
+    7887:     for i, option in enumerate(options):
+    7617:         coordinates = set(option)
+    7617:         if (coordinates & crosses) or not(points <= coordinates):
+    3198:             to_pop.append(i)
+                  else:
+    4419:             intersection = intersection & coordinates
+    4419:             substraction = substraction - coordinates
+          
+    3468:     for i in reversed(to_pop):
+    3198:         options.pop(i)
+    1681:     for i in intersection:
+    1411:         row[i] = 1
+    1904:     for i in substraction:
+    1634:         row[i] = 2
+          
+     270:     return True if to_pop else False
+          
+          
+          def solve_field(x_elements: list, y_elements: list) -> list:
+       1:     m = len(x_elements)  # number of rows
+       1:     n = len(y_elements)  # number of columns
+       1:     field = [0] * (m * n)
+          
+      16:     x_options = [get_all_row_options(n, elements) for elements in x_elements]
+      16:     y_options = [get_all_row_options(m, elements) for elements in y_elements]
+          
+       1:     to_continue = True
+      10:     while to_continue:
+       9:         to_continue = False
+     144:         for i in range(m):  # solve rows
+     135:             row = field[i*n:(i + 1)*n]
+     135:             if solve_row(row, x_options[i]):
+      48:                 to_continue = True
+     135:             field[i*n:(i + 1)*n] = row
+          
+     144:         for i in range(n):  # solve columns
+     135:             column = field[i::n]
+     135:             if solve_row(column, y_options[i]):
+      53:                 to_continue = True
+     135:             field[i::n] = column
+          
+       1:     return field, m, n

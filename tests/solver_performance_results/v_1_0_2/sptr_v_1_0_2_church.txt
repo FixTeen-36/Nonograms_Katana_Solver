@@ -1,0 +1,89 @@
+solver performance test results
+src version: 1.0.2
+input file: church.csv
+total iterations: 36,582
+
+solver.py line execution statistics:
+          def get_all_row_options(row_len: int, el: list) -> list:  # el: elments_ length
+      30:     remainder = row_len - (sum(el) + len(el) - 1)  # remainder: how many blank spaces are after the last element 
+      30:     cc = remainder
+      30:     coordinates = []
+     107:     for length in el:
+      77:         to_extend = range(cc, (cc + length))
+      77:         coordinates.extend(list(to_extend))
+      77:         cc += length + 1
+          
+      30:     options = [coordinates]
+      30:     number_of_copies = [0] * remainder
+      30:     s_n = 1  # sum of number of copies
+     107:     for i in range(len(el)):
+     441:         for _ in range(remainder):
+    2107:             for coordinates in options[-s_n:]:
+    1743:                 c_copy = coordinates[:]
+    1743:                 j_a = sum(el[:i])
+    1743:                 c_copy.insert(j_a, (c_copy[j_a] - 1))
+    1743:                 j_b = sum(el[:(i + 1)])
+    1743:                 c_copy.pop(j_b)
+    1743:                 options.append(c_copy)
+     364:             number_of_copies.append(s_n)
+     364:             s_n -= number_of_copies.pop(0)
+      77:         s_n = sum(number_of_copies)
+          
+      30:     return options
+          
+          
+          def solve_row(row: list, options: list) -> set:
+      67:     points = set()
+      67:     crosses = set()
+    1072:     for i, value in enumerate(row):
+    1005:         if value == 1:
+     355:             points.add(i)
+    1005:         if value == 2:
+     221:             crosses.add(i)
+              
+      67:     to_pop = []
+      67:     intersection = set(range(len(row))) - points
+      67:     substraction = set(range(len(row))) - crosses
+    3117:     for i, option in enumerate(options):
+    3050:         coordinates = set(option)
+    3050:         if (coordinates & crosses) or not(points <= coordinates):
+    1743:             to_pop.append(i)
+                  else:
+    1307:             intersection = intersection & coordinates
+    1307:             substraction = substraction - coordinates
+          
+    1810:     for i in reversed(to_pop):
+    1743:         options.pop(i)
+     192:     for i in intersection:
+     125:         row[i] = 1
+     167:     for i in substraction:
+     100:         row[i] = 2
+          
+      67:     return intersection | substraction
+          
+          
+          def solve_field(x_elements: list, y_elements: list) -> list:
+       1:     m = len(x_elements)  # number of rows
+       1:     n = len(y_elements)  # number of columns
+       1:     field = [0] * (m * n)
+          
+      16:     x_options = [get_all_row_options(n, elements) for elements in x_elements]
+      16:     y_options = [get_all_row_options(m, elements) for elements in y_elements]
+          
+       1:     to_continue = True
+       4:     while to_continue:
+       3:         to_continue = False
+       3:         columns_to_solve = set()
+      48:         for i in range(m):  # solve rows
+      45:             row = field[i*n:(i + 1)*n]
+      45:             columns_to_solve |= solve_row(row, x_options[i])
+      45:             field[i*n:(i + 1)*n] = row
+       3:         to_continue = True if columns_to_solve else False
+                  
+      25:         for i in columns_to_solve:  # solve columns
+      22:             column = field[i::n]
+      22:             if solve_row(column, y_options[i]):
+      21:                 to_continue = True
+      22:             field[i::n] = column
+          
+       1:     return field, m, n
